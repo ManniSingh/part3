@@ -1,0 +1,32 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "phonebook exercises",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \\\\\\\"Error: no test specified\\\\\\\" && exit 1",
+    "build:ui": "rm -rf build && cd ../../FS_HEL/part2/phonebook && npm run build --prod && cp -r build ../../../part3/phonebook",
+    "deploy": "git push heroku master",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push && npm run deploy",    
+    "logs:prod": "heroku logs --tail"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/part3/phonebook.git"
+  },
+  "author": "Manni Singh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/part3/phonebook/issues"
+  },
+  "homepage": "https://github.com/part3/phonebook#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14"
+  }
+}
