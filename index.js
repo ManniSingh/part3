@@ -54,16 +54,10 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.get('/api/persons/:id', (request, response) => {
-  Contact.findById(request.params.id).then(per => {
-    response.json(per)
-  })
-})
-
-//deletes first element in any case???
-app.delete('/api/persons/:id', (request, response) => {
-console.log(request.params.id)
-Contact.deleteOne({'id':request.params.id}).then(res => console.log(res))
+app.get('/api/persons/:id', (request, response, next) => {
+  Contact.findById(request.params.id)
+  .then(per => {per?response.json(per):response.status(404).end()})
+  .catch(error => next(error))
 })
 
 /*
@@ -94,11 +88,45 @@ app.post('/api/persons', (request, response) => {
   })
 })
 
+app.delete('/api/persons/:id', (request, response, next) => {
+  Contact.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+  const contact = {
+    name:body.name,
+    number:body.number,
+  }
+
+  Contact.findByIdAndUpdate(request.params.id, contact, { new: true })
+    .then(updated => {
+      response.json(updated)
+    })
+    .catch(error => next(error))
+})
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
 app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 //listener
 const PORT = process.env.PORT
