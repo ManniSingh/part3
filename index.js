@@ -72,7 +72,7 @@ const generateId = () => {
 }
 */
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
   if (body.name === undefined) {
     return response.status(400).json({ error: `${body.name}` })
@@ -83,9 +83,10 @@ app.post('/api/persons', (request, response) => {
     number:body.number
   })
 
-  contact.save().then(savedper => {
-    response.json(savedper)
-  })
+  contact.save()
+  .then(savedper => savedper.toJSON())
+  .then(savedFormatted => response.json(savedFormatted))
+  .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {

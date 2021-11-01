@@ -13,3 +13,11 @@ content-type: application/json
     "name": "nyc",
     "number": "1628"
 }
+###
+POST http://intense-eyrie-54211.herokuapp.com/api/persons/ HTTP/1.1
+content-type: application/json
+
+{
+    "name": "rest posted name 2",
+    "number": "00366374"
+}
