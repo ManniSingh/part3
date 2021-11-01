@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
@@ -11,6 +12,8 @@ morgan.token('content', (req, res) => {
   }
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :content'))
+
+/*
 let persons = [
     { 
       "id": 1,
@@ -33,35 +36,37 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
+*/
 
+const Contact = require('./models/contact')
 
-// interfaces
+/*
 app.get('/info', (request, response) => {
     date = new Date()
     response.send(`<h1>the phonebook contains info for ${persons.length} people</h1>
                    <h1> ${new Date().toString()} </h1>`)
 })
+*/
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+  Contact.find({}).then(per => {
+    response.json(per)
+  })
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(per => per.id === id)
-    if (person) {
-        response.json(person)
-    }else {
-        response.status(404).end()
-    }
+  Contact.findById(request.params.id).then(per => {
+    response.json(per)
+  })
 })
 
+//deletes first element in any case???
 app.delete('/api/persons/:id', (request, response) => {
-const id = Number(request.params.id)
-persons = persons.filter(per => per.id !== id)
-response.status(204).end()
+console.log(request.params.id)
+Contact.deleteOne({'id':request.params.id}).then(res => console.log(res))
 })
 
+/*
 const generateId = () => {
   let rand = Math.floor(Math.random()*10000)
   let exists = persons.filter(per=>per.id==rand)
@@ -71,33 +76,22 @@ const generateId = () => {
   }
   return rand
 }
+*/
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  console.log(request.headers)
-  console.log(request.body)
-  if (!body.name) {
-    return response.status(400).json({error: 'name missing'})
-  }
-  if (!body.number) {
-    return response.status(400).json({error: 'number missing'})
+  if (body.name === undefined) {
+    return response.status(400).json({ error: `${body.name}` })
   }
 
-  const found = persons.find(record => record.name === body.name)
-  console.log('found',found)
-  if (found){
-    return response.status(400).json({error: 'name must be unique'})
-  }
+  const contact = new Contact({
+    name:body.name,
+    number:body.number
+  })
 
-  const person = {
-    name: body.name, 
-    number: body.number,
-    id: generateId()
-  }
-
-  persons = persons.concat(person)
-
-  response.json(person)
+  contact.save().then(savedper => {
+    response.json(savedper)
+  })
 })
 
 const unknownEndpoint = (request, response) => {
@@ -107,7 +101,7 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 //listener
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
