@@ -14,8 +14,8 @@ mongoose.connect(url)
   })
 
 const pbSchema = new mongoose.Schema({
-name: { type: String, required: true, unique: true },
-number: { type: String, required: true}
+name: { type: String, required: true, minLength: 3, unique: true},
+number: { type: String, required: true, minLength: 5}
 })
 
 pbSchema.plugin(uniqueValidator)
